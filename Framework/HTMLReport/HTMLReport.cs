@@ -25,7 +25,7 @@ namespace Framework.HTMLReport
         private static ExtentReports createInstance(string path)
         {
             ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(path);
-            htmlReporter.Config.DocumentTitle = "ASSET MANAGEMENT";
+            htmlReporter.Config.DocumentTitle = "HoangQuyDao-Exercise";
             htmlReporter.Config.ReportName = "Automation-Report";
             htmlReporter.Config.Theme = Theme.Standard;
             htmlReporter.Config.Encoding = "UTF-8";
@@ -90,5 +90,6 @@ namespace Framework.HTMLReport
         {
             Report.Flush();
         }
+
     }
 }

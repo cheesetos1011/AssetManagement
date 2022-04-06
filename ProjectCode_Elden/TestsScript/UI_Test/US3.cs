@@ -1,3 +1,4 @@
+﻿
 using Framework;
 using NUnit.Framework;
 using ProjectCode.PageObject;
@@ -7,9 +8,9 @@ namespace ProjectCode
     [TestFixtureSource(typeof(CrossBrowserData), nameof(CrossBrowserData.LastestConfigurations))]
     [Parallelizable(ParallelScope.Self)]
 
-    public class US3_ViewUserList : TestSetup
+    public class US3 : TestSetup
     {
-        public US3_ViewUserList(string browser, string osPlatform) : base(browser, osPlatform)
+        public US3(string browser, string osPlatform) : base(browser, osPlatform)
         {
 
         }
@@ -40,7 +41,7 @@ namespace ProjectCode
             manageUserPage.ClickManageUser();
             manageUserPage.SearchByValue(staffCode);
 
-            Assert.That(manageUserPage.getSearchResult().Contains(staffCode),"No matched search");
+            Assert.That(manageUserPage.getSearchResult().Contains(staffCode), "No matched search");
 
         }
 
@@ -115,4 +116,3 @@ namespace ProjectCode
 
     }
 }
-

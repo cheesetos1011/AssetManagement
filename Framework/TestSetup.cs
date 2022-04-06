@@ -49,8 +49,7 @@ namespace Framework
         {
             HTMLReporter.createNode(TestContext.CurrentContext.Test.ClassName, TestContext.CurrentContext.Test.Name, "test class description here");
             driver = WebDriverCreator.CreateLocalDriver(_browser);
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-            driver.Url = "http://group1reactjs.azurewebsites.net";
+            driver.Url = "http://group1reactjs.azurewebsites.net/users";
         }
 
         [TearDown]
@@ -70,5 +69,6 @@ namespace Framework
         {
             HTMLReporter.Flush();
         }
+
     }
 }

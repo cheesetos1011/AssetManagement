@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTO\" />
+    <Folder Include="TestCase\" />
     <Folder Include="Reports\" />
   </ItemGroup>
 

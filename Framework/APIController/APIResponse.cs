@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using RestSharp;
+using System.IO;
 using System.Net;
 
 namespace Framework.APIController
@@ -7,47 +8,37 @@ namespace Framework.APIController
     public class APIResponse
     {
 
-        private RestResponse response;
+        private HttpWebResponse response;
         public string responseBody { get; set; }
-        public int responseStatusCode { get; set; }
-        public string responseStatus { get; set; }
-        public dynamic obj { get; set; }
-        public APIResponse(RestResponse response)
+        public string responseStatusCode { get; set; }
+        public APIResponse(HttpWebResponse response)
         {
             this.response = response;
             GetResponseBody();
-            GetresponseStatusCode();
-            GetResponseStatus();
-            deserialize();
+            GetResponseStatusCode();
         }
+
         private string GetResponseBody()
         {
             responseBody = "";
-
-            if (response != null)
-
-            { responseBody = response.Content; }
-
+            using (var responseStream = response.GetResponseStream())
+            {
+                if (responseStream != null)
+                {
+                    using (var reader = new StreamReader(responseStream))
+                    {
+                        responseBody = reader.ReadToEnd();
+                    }
+                }
+            }
             return responseBody;
         }
-        private int GetresponseStatusCode()
-        {
-            HttpStatusCode statusCode = response.StatusCode;
-            responseStatusCode = (int)statusCode;
 
+        private string GetResponseStatusCode()
+        {
+            responseStatusCode = response.StatusCode.ToString();
             return responseStatusCode;
         }
-        private string GetResponseStatus()
-        {
-            responseStatus = response.StatusCode.ToString();
-
-            return responseStatus;
-        }
-        private dynamic deserialize()
-        {
-            dynamic result = JsonConvert.DeserializeObject<dynamic>(responseBody);
-            obj = result;
-            return result;
-        }
     }
+
 }

@@ -3,205 +3,182 @@ using Framework.HTMLReport;
 using Newtonsoft.Json;
 using RestSharp;
 using System;
+using System.Net;
+using System.Text;
+using System.IO;
 
 namespace Framework.APIController
 {
     public class APIRequest
     {
-        private RestRequest Request;
+        public HttpWebRequest request;
+        public string url { get; set; }
+        public int queryParamCount { get; set; }
         public string requestBody { get; set; }
         public string formData { get; set; }
-        public string url { get; set; }
-        public string uri { get; set; }
-        public string _Method { get; set; }
-        public string _Header { get; set; }
 
-        private static RestClient Client;
-        public static RestClient CreateClient(string url)
-        {
-
-            if (Client == null)
-            {
-                Client = createInstance(url);
-            }
-            return Client;
-
-        }
-        private static RestClient createInstance(string url)
-        {
-            RestClient Client = new RestClient(url);
-            return Client;
-        }
-        public APIRequest SetClient(string url, string uri)
+        public APIRequest setUrl(string url)
         {
             this.url = url;
-            this.uri = uri;
-            CreateClient(url);
-            Request = new RestRequest(uri);
             return this;
         }
+        public APIRequest setBaseUrl(string url)
+        {
+            this.url = url;
+            return this;
+        }
+
+
+        public APIRequest CreateRequest()
+        {
+            this.url = url;
+            request = (HttpWebRequest)WebRequest.Create(url);
+            return this;
+        }
+
         public APIRequest()
         {
-            requestBody = "";
+            url = "";
             formData = "";
-            _Method = "";
-            _Header = "";
+            requestBody = "";
+            queryParamCount = 0;
         }
+
         public APIRequest AddHeader(string key, string value)
         {
-            Request.AddHeader(key, value);
-            _Header = key + " " + value;
+            request.Headers.Add(key, value);
+            return this;
+        }
+        /*
+        public APIRequest AddRequestParameter(string key, string value)
+        {
+            if (url.Contains("?"))
+            {
+                url = url + "?" + key + "=" + value;
+            }
+            else
+            {
+                url = url + "&" + key + "=" + value;
+            }
+            return this;
+        }
+        */
+
+        public APIRequest AddQueryParameter(string key, string value)
+        {
+            if (queryParamCount == 0)
+            {
+                url = url + "?" + key + "=" + value;
+                queryParamCount++;
+            }
+            else
+            {
+                url = url + "&" + key + "=" + value;
+            }
             return this;
         }
 
-        public APIRequest AddParameter(string key, string value)
+        public APIRequest AddFormData(string key, string value)
         {
-            Request.AddParameter(key, value);
-            return this;
-        }
-        public APIRequest AddObJect(object obj)
-        {
-            Request.AddObject(obj);
-            return this;
-        }
-        public APIRequest AddJsonBody(object obj)
-        {
-            requestBody = JsonConvert.SerializeObject(obj);
-            Request.AddJsonBody(obj);
+            if (formData.Equals("") || formData == null)
+            {
+                formData += key + "=" + value;
+            }
+            else if (!formData.Equals(""))
+            {
+                formData += "&" + key + "=" + value;
+            }
             return this;
         }
 
-        public APIRequest AddURLSegment(string segment, string data)
+        public APIRequest SendContentType(string name)
         {
-            Request.AddUrlSegment(segment, data);
-            return this;
-        }
-        public APIRequest AddStringBody(string bodyRequest, DataFormat format)
-        {
-            requestBody = bodyRequest;
-            Request.AddStringBody(bodyRequest, format);
+            request.ContentType = name;
             return this;
         }
 
-        public APIResponse Get()
+        public APIRequest AddRequestBody(string body)
         {
-            try
+            this.requestBody = body;
+            return this;
+        }
+
+        public APIRequest SetMethod(string method)
+        {
+            request.Method = method;
+            return this;
+        }
+
+        public APIRequest Get()
+        {
+            request.Method = "GET";
+            APIResponse response = SendRequest();
+            return this;
+        }
+        public APIRequest Post()
+        {
+            request.Method = "POST";
+            APIResponse response = SendRequest();
+            return this;
+        }
+        public APIRequest Put()
+        {
+            request.Method = "PUT";
+            APIResponse response = SendRequest();
+            return this;
+        }
+        public APIRequest Delete()
+        {
+            request.Method = "DELETE";
+            APIResponse response = SendRequest();
+            return this;
+        }
+
+
+        public APIResponse SendRequest()
+        {
+            if (request.Method == "GET")
             {
                 requestBody = null;
-                Request.Method = Method.Get;
-                _Method = Method.Get.ToString();
-                var response = Client.GetAsync(Request).Result;
-                APIResponse Response = new(response);
-                HTMLReporter.Pass(this, Response);
-                return Response;
             }
-            catch (Exception ex)
+            else
             {
-                throw ex;
+                if (requestBody != null)
+                {
+                    byte[] byteArray = Encoding.UTF8.GetBytes(requestBody);
+                    request.ContentLength = byteArray.Length;
+                    using (Stream dataStream = request.GetRequestStream())
+                    {
+                        dataStream.Write(byteArray, 0, byteArray.Length);
+                        dataStream.Flush();
+                        dataStream.Close();
+                    }
+                }
+                if (!formData.Equals(""))
+                {
+                    byte[] byteArray = Encoding.UTF8.GetBytes(requestBody);
+                    request.ContentLength = byteArray.Length;
+                    using (Stream dataStream = request.GetRequestStream())
+                    {
+                        dataStream.Write(byteArray, 0, byteArray.Length);
+                        dataStream.Flush();
+                        dataStream.Close();
+                    }
+                }
             }
-        }
-
-        public APIResponse Post()
-        {
             try
             {
-                Request.Method = Method.Post;
-                _Method = Method.Post.ToString();
-                var response = Client.PostAsync(Request).Result;
-                APIResponse Response = new(response);
-                HTMLReporter.Pass(this, Response);
-                return Response;
+                IAsyncResult asyncResult = request.BeginGetResponse(null, null);
+                asyncResult.AsyncWaitHandle.WaitOne();
+                var httpResponse = (HttpWebResponse)request.EndGetResponse(asyncResult);
+                APIResponse response = new APIResponse(httpResponse);
+                HTMLReporter.Pass(this, response);
+                return response;
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-
-        }
-        public APIResponse Delete()
-        {
-            try
-            {
-                Request.Method = Method.Delete;
-                _Method = Method.Delete.ToString();
-                var response = Client.DeleteAsync(Request).Result;
-                APIResponse Response = new(response);
-                HTMLReporter.Pass(this, Response);
-                return Response;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-        }
-        public APIResponse Put()
-        {
-            try
-            {
-                Request.Method = Method.Put;
-                _Method = Method.Put.ToString();
-                var response = Client.PutAsync(Request).Result;
-                APIResponse Response = new(response);
-                HTMLReporter.Pass(this, Response);
-                return Response;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-        }
-        public APIResponse Head()
-        {
-            try
-            {
-                Request.Method = Method.Head;
-                _Method = Method.Head.ToString();
-                var response = Client.HeadAsync(Request).Result;
-                APIResponse Response = new(response);
-                HTMLReporter.Pass(this, Response);
-                return Response;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-        }
-        public APIResponse Option()
-        {
-            try
-            {
-                Request.Method = Method.Options;
-                _Method = Method.Options.ToString();
-                var response = Client.HeadAsync(Request).Result;
-                APIResponse Response = new(response);
-                HTMLReporter.Pass(this, Response);
-                return Response;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-        }
-        public APIResponse Patch()
-        {
-            try
-            {
-                Request.Method = Method.Patch;
-                _Method = Method.Patch.ToString();
-                var response = Client.HeadAsync(Request).Result;
-                APIResponse Response = new(response);
-                HTMLReporter.Pass(this, Response);
-                return Response;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
         }
 
     }
