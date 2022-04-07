@@ -8,7 +8,7 @@ namespace ProjectCode
     [TestFixtureSource(typeof(CrossBrowserData), nameof(CrossBrowserData.LastestConfigurations))]
     [Parallelizable(ParallelScope.Self)]
 
-    public class US3 : TestSetup
+    public class US3 : TestSetup2
     {
         public US3(string browser, string osPlatform) : base(browser, osPlatform)
         {

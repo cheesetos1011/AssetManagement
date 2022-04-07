@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Framework.APIController;
 using Framework.HTMLReport;
 using Newtonsoft.Json;
+using static ProjectCode.DTO.User.LoginDataResponse;
 using static ProjectCode.DTO.User.User;
 
 namespace ProjectCode.Services
@@ -27,10 +28,10 @@ namespace ProjectCode.Services
             return response;
         }
 
-        public UserData Login(string username, string password)
+        public LoginData Login(string username, string password)
         {
             APIResponse response = LoginRequest(username, password);
-            UserData userLogin = (UserData)JsonConvert.DeserializeObject<UserData>(response.responseBody);
+            LoginData userLogin = (LoginData)JsonConvert.DeserializeObject<LoginData>(response.responseBody);
             return userLogin;
 
             /*

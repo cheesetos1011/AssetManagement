@@ -49,7 +49,7 @@ namespace Framework
         {
             HTMLReporter.createNode(TestContext.CurrentContext.Test.ClassName, TestContext.CurrentContext.Test.Name, "test class description here");
             driver = WebDriverCreator.CreateLocalDriver(_browser);
-            driver.Url = "http://group1reactjs.azurewebsites.net/users";
+            driver.Url = "http://group1reactjs.azurewebsites.net/";
         }
 
         [TearDown]

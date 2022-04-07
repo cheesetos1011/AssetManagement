@@ -9,8 +9,8 @@ namespace Framework.HTMLReport
         public static IMarkup CreateRequestInfor(APIRequest request, APIResponse response)
         {
             APIRequestBlock markup = new APIRequestBlock();
-            markup.Request = request;
-            markup.Response = response;
+            markup.request = request;
+            markup.response = response;
             return markup;
 
         }

@@ -7,13 +7,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ProjectCode.DTO.User.User;
 
 namespace ProjectCode.TestsScript
 {
     [TestFixtureSource(typeof(CrossBrowserData), nameof(CrossBrowserData.LastestConfigurations))]
     [Parallelizable(ParallelScope.Self)]
 
-    public class US3_ViewUserListAndDetails : TestSetup
+    public class US3_ViewUserListAndDetails : TestSetup2
     {
         public string messageId;
 
@@ -21,21 +22,24 @@ namespace ProjectCode.TestsScript
         {
         }
 
-        
+        /*
         [Test, Category("API-Login")]
-        // [TestCaseSource(typeof(TestCase1), "GetTestData")]
         public void LoginRequest()
         {
             AuthenticationService authenService = new AuthenticationService();
             string _token = authenService.Login("admin1", "Rookiesms1").token;
         }
+        */
 
         [Test, Category("Get user list")]
         public void getUserList()
         {
             UserService userService = new UserService();
 
-            APIResponse getUser = userService.GetUserDataRequest();
+            List<Data> getUser = userService.GetListUsers(_token);
+
+            Console.WriteLine(getUser);
+            Console.WriteLine(_token);
 
 
         }

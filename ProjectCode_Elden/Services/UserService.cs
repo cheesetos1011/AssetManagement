@@ -14,10 +14,14 @@ namespace ProjectCode.Services
     {
 
         string userListPath = "api/users/list";
-        public APIResponse GetUserDataRequest()
+        public APIResponse GetUserDataRequest(string token)
         {
             APIResponse response = new APIRequest()
                 .setUrl("https://rookiesgroup1.azurewebsites.net/" + userListPath)
+                .CreateRequest()
+                .AddQueryParameter("location","Hanoi")
+                .AddHeader("Authorization", "Bearer " + token)
+                
                 .SetMethod("GET")
                 .SendRequest();
             HTMLReporter.Pass(response.responseBody);
@@ -25,10 +29,10 @@ namespace ProjectCode.Services
 
         }
 
-        public List<UserData> GetUsers()
+        public List<Data> GetListUsers(string token)
         {
-            APIResponse response = GetUserDataRequest();
-            List<UserData> userDatas = JsonConvert.DeserializeObject<List<UserData>>(response.responseBody);
+            APIResponse response = GetUserDataRequest(token);
+            List<Data> userDatas = JsonConvert.DeserializeObject<List<Data>>(response.responseBody);
             return userDatas;
         }
     }
